@@ -10,7 +10,7 @@ COPY main.py /main.py
 
 # Install cron and set up the crontab
 RUN apt-get install -y cron
-RUN echo "0 0 * * * python3 /main.py" > /etc/cron.d/some_script
+RUN echo "0 0 * * * python3 /main.py" > /etc/cron.d/main
 
 # Start cron in the foreground
 CMD ["cron", "-f"]
