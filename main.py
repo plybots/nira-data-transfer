@@ -25,7 +25,7 @@ def __data__map():
         "dateOfDeath": "i8rrl8YWxLF",
         "timeOfDeath": "i8rrl8YWxLF",
         "placeOfDeath": {
-            "healthFacilityName": None,
+            "healthFacilityName": "ouname",
             "districtName": None,
             "countyName": None,
             "subcountyName": None,
