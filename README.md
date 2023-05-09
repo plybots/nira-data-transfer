@@ -23,8 +23,8 @@
 `docker build -t zato-cron:latest .`
 
 #### Inside the container
-`docker exec -it zato-cron bash`
-`python main.py`
-`export START_COUNT=10`
-`export END_COUNT=20`
+`docker exec -it zato-cron bash` \
+`python main.py` \
+`export START_COUNT=10` \
+`export END_COUNT=20` \
 
