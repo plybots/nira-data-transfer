@@ -1,4 +1,8 @@
 import datetime
+import json
+import os
+
+import requests
 
 
 def __data__map():
@@ -11,21 +15,21 @@ def __data__map():
             "age": "q7e7FOXKnOf",
             "identificationNumber": "MOstDqSY0gO",
             "sex": "e96GB4CXyd3",
-            "occupation": "dsiwvNQLe5n",
+            "occupation": "b70okb06FWa",
             "nationality": None,
             "nationalityCategory": None,
             "residence": {
-                "districtName": None,
-                "countyName": None,
-                "subcountyName": None,
-                "parishName": None,
-                "villageName": "zwKo51BEayZ",
+                "districtName": 'u44XP9fZweA',
+                "countyName": 'dsiwvNQLe5n',
+                "subcountyName": 't5nTEmlScSt',
+                "parishName": 'bNpMzyShDCX',
+                "villageName": 'dsiwvNQLe5n',
             },
         },
         "dateOfDeath": "i8rrl8YWxLF",
         "timeOfDeath": "i8rrl8YWxLF",
         "placeOfDeath": {
-            "healthFacilityName": "ouname",
+            "healthFacilityName": "ou",
             "districtName": None,
             "countyName": None,
             "subcountyName": None,
@@ -236,6 +240,40 @@ def get_declarant_capacity(s, headers, row):
                 return 4
     return 4
 
+
+def get_dict_value_at_level(d, level):
+    try:
+        if d.get('level') == level:
+            return d.get('name')
+        elif d.get('parent').get('level') == level:
+            return d.get('parent').get('name')
+        elif d.get('parent').get('parent').get('level') == level:
+            return d.get('parent').get('parent').get('name')
+    except Exception:
+        return None
+
+
+def get_place_of_death(ouid):
+    url = f"{os.environ.get('DHIS_BASE_URL', 'https://hmis.health.go.ug')}/api/organisationUnits/{ouid}?fields=name,level,parent[name,level,parent[name,level,parent[name,level,parent[name,level]]"
+    basic_auth_credentials = (f"{os.environ.get('DHIS_USERNAME', 'moh-rch.dmurokora')}", f"{os.environ.get('DHIS_PASSWORD', 'Dhis@2022')}")
+    # send a get request with the auth header
+    response = requests.get(url, auth=basic_auth_credentials)
+    data = response.json()
+    healthFacilityName = get_dict_value_at_level(data, 5)
+    districtName = get_dict_value_at_level(data, 3)
+    subcountyName = get_dict_value_at_level(data, 4)
+    placeOfDeath = {}
+    if healthFacilityName:
+        placeOfDeath['healthFacilityName'] = healthFacilityName
+    if districtName:
+        placeOfDeath['districtName'] = districtName
+    if subcountyName:
+        placeOfDeath['subcountyName'] = subcountyName
+        placeOfDeath['countyName'] = subcountyName
+
+    return placeOfDeath if placeOfDeath else None
+
+
 def iterate_dict(d, headers, row):
     output = {}
     for key, value in d.items():
@@ -272,8 +310,17 @@ def iterate_dict(d, headers, row):
 
 def get_dhis_data():
     import requests
-    url = "https://hmis.health.go.ug/api/29/analytics/events/query/vf8dN49jprI.json?dimension=pe:2022;2023;2021&dimension=ou:akV6429SUqu&dimension=aKclf7Yl1PE.ZKBE8Xm9DJG&dimension=aKclf7Yl1PE.MOstDqSY0gO&dimension=aKclf7Yl1PE.ZYKmQ9GPOaF&dimension=aKclf7Yl1PE.zwKo51BEayZ&dimension=aKclf7Yl1PE.Z41di0TRjIu&dimension=aKclf7Yl1PE.dsiwvNQLe5n&dimension=aKclf7Yl1PE.RbrUuKFSqkZ&dimension=aKclf7Yl1PE.q7e7FOXKnOf&dimension=aKclf7Yl1PE.e96GB4CXyd3&dimension=aKclf7Yl1PE.i8rrl8YWxLF&dimension=aKclf7Yl1PE.sfpqAeqKeyQ&dimension=aKclf7Yl1PE.zD0E77W4rFs&dimension=aKclf7Yl1PE.cSDJ9kSJkFP&dimension=aKclf7Yl1PE.WkXxkKEJLsg&dimension=aKclf7Yl1PE.Ylht9kCLSRW&dimension=aKclf7Yl1PE.zb7uTuBCPrN&dimension=aKclf7Yl1PE.tuMMQsGtE69&dimension=aKclf7Yl1PE.uckvenVFnwf&dimension=aKclf7Yl1PE.fleGy9CvHYh&dimension=aKclf7Yl1PE.myydnkmLfhp&dimension=aKclf7Yl1PE.QGFYJK00ES7&dimension=aKclf7Yl1PE.C8n6hBilwsX&dimension=aKclf7Yl1PE.ZFdJRT3PaUd&dimension=aKclf7Yl1PE.hO8No9fHVd2&dimension=aKclf7Yl1PE.aC64sB86ThG&dimension=aKclf7Yl1PE.CnPGhOcERFF&dimension=aKclf7Yl1PE.IeS8V8Yf40N&dimension=aKclf7Yl1PE.Op5pSvgHo1M&dimension=aKclf7Yl1PE.eCVDO6lt4go&dimension=aKclf7Yl1PE.cmZrrHfTxW3&dimension=aKclf7Yl1PE.QTKk2Xt8KDu&dimension=aKclf7Yl1PE.dTd7txVzhgY&dimension=aKclf7Yl1PE.xeE5TQLvucB&dimension=aKclf7Yl1PE.ctbKSNV2cg7&dimension=aKclf7Yl1PE.mI0UjQioE7E&dimension=aKclf7Yl1PE.krhrEBwJeNC&dimension=aKclf7Yl1PE.u5ebhwtAmpU&dimension=aKclf7Yl1PE.ZKtS7L49Poo&dimension=aKclf7Yl1PE.OxJgcwH15L7&dimension=aKclf7Yl1PE.fJDDc9mlubU&dimension=aKclf7Yl1PE.Zrn8LD3LoKY&dimension=aKclf7Yl1PE.z89Wr84V2G6&dimension=aKclf7Yl1PE.Kk0hmrJPR90&dimension=aKclf7Yl1PE.j5TIQx3gHyF&dimension=aKclf7Yl1PE.JhHwdQ337nn&dimension=aKclf7Yl1PE.jY3K6Bv4o9Q&dimension=aKclf7Yl1PE.UfG52s4YcUt&dimension=aKclf7Yl1PE.FhHPxY16vet&dimension=aKclf7Yl1PE.KsGOxFyzIs1&dimension=aKclf7Yl1PE.b4yPk98om7e&dimension=aKclf7Yl1PE.gNM2Yhypydx&dimension=aKclf7Yl1PE.tYH7drlbNya&dimension=aKclf7Yl1PE.fQWuywOaoN2&dimension=aKclf7Yl1PE.wX3i3gkTG4m&dimension=aKclf7Yl1PE.xDMX2CJ4Xw3&dimension=aKclf7Yl1PE.o1hG9vr0peF&dimension=aKclf7Yl1PE.AZSlwlRAFig&dimension=aKclf7Yl1PE.U18Tnfz9EKd&dimension=aKclf7Yl1PE.DKlOhZJOCrX&dimension=aKclf7Yl1PE.kGIDD5xIeLC&dimension=aKclf7Yl1PE.V4rE1tsj5Rb&dimension=aKclf7Yl1PE.ivnHp4M4hFF&dimension=aKclf7Yl1PE.jf9TogeSZpk&dimension=aKclf7Yl1PE.xAWYJtQsg8M&dimension=aKclf7Yl1PE.lQ1Byr04JTx&dimension=aKclf7Yl1PE.DdfDMFW4EJ9&dimension=aKclf7Yl1PE.GFVhltTCG8b&dimension=aKclf7Yl1PE.KpfvNQSsWIw&dimension=aKclf7Yl1PE.AJAraEcfH63&dimension=aKclf7Yl1PE.ymyLrfEcYkD&dimension=aKclf7Yl1PE.K5BDPJQk1BP&dimension=aKclf7Yl1PE.uaxjt0inPNF&dimension=aKclf7Yl1PE.Kz29xNOBjsJ&dimension=aKclf7Yl1PE.ZXZZfzBpu8a&dimension=aKclf7Yl1PE.cp5xzqVU2Vw&dimension=aKclf7Yl1PE.lu9BiHPxNqH&dimension=aKclf7Yl1PE.PaoRZbokFWJ&dimension=aKclf7Yl1PE.twVlVWM3ffz&stage=aKclf7Yl1PE&displayProperty=NAME&outputType=EVENT&desc=eventdate&paging=false"
-    basic_auth_credentials = ("moh-rch.dmurokora", "Dhis@2022")
+    url = f"{os.environ.get('DHIS_BASE_URL', 'https://hmis.health.go.ug')}{os.environ.get('DHIS_DATA_URL', '/api/29/analytics/events/query/vf8dN49jprI.json')}?dimension=pe:2022;2023;2021&" \
+          "dimension=ou:akV6429SUqu&dimension=aKclf7Yl1PE.ZKBE8Xm9DJG&dimension=aKclf7Yl1PE.MOstDqSY0gO&dimension=" \
+          "aKclf7Yl1PE.ZYKmQ9GPOaF&dimension=aKclf7Yl1PE.Z41di0TRjIu&dimension=aKclf7Yl1PE.dsiwvNQLe5n&dimension=" \
+          "aKclf7Yl1PE.RbrUuKFSqkZ&dimension=aKclf7Yl1PE.q7e7FOXKnOf&dimension=aKclf7Yl1PE.e96GB4CXyd3&dimension=" \
+          "aKclf7Yl1PE.i8rrl8YWxLF&dimension=aKclf7Yl1PE.FhHPxY16vet&dimension=aKclf7Yl1PE.gNM2Yhypydx&dimension=" \
+          "aKclf7Yl1PE.KsGOxFyzIs1&dimension=aKclf7Yl1PE.b4yPk98om7e&dimension=aKclf7Yl1PE.wX3i3gkTG4m&dimension=" \
+          "aKclf7Yl1PE.tYH7drlbNya&dimension=aKclf7Yl1PE.fQWuywOaoN2&dimension=aKclf7Yl1PE.o1hG9vr0peF&dimension=" \
+          "aKclf7Yl1PE.xDMX2CJ4Xw3&dimension=aKclf7Yl1PE.AZSlwlRAFig&dimension=aKclf7Yl1PE.t5nTEmlScSt&dimension=" \
+          "aKclf7Yl1PE.u44XP9fZweA&dimension=aKclf7Yl1PE.zwKo51BEayZ&dimension=aKclf7Yl1PE.b70okb06FWa&dimension=" \
+          "aKclf7Yl1PE.bNpMzyShDCX&stage=aKclf7Yl1PE&displayProperty=NAME&outputType=EVENT&desc=eventdate&paging=false"
+    basic_auth_credentials = (f"{os.environ.get('DHIS_USERNAME', 'moh-rch.dmurokora')}", f"{os.environ.get('DHIS_PASSWORD', 'Dhis@2022')}")
     # send a get request with the auth header
     response = requests.get(url, auth=basic_auth_credentials)
     # print the response text
@@ -297,34 +344,56 @@ def get_nira_data(row):
         if key == 'externalCauseOfDeath':
             if len(sub_dict) <= 1:
                 post_data.pop('externalCauseOfDeath')
+        if key == 'placeOfDeath':
+            post_data[key] = get_place_of_death(sub_dict.get('healthFacilityName'))
     return post_data
 
 
-def submit_to_nira(data):
+def submit_to_nira(data, debug=False):
     import requests
     from requests.auth import HTTPDigestAuth
-    url = "http://mobilevrs.nira.go.ug:8080/test/ThirdPartyApi/deaths.php"
-    username = "dhsi2.api"
-    password = "7162165ccebfa49657126bd8"
-    realm = "mVRS API:deaths"
+    url = f"{os.environ.get('NIRA_URL', 'http://mobilevrs.nira.go.ug:8080/test/ThirdPartyApi/deaths.php')}"
+    username = f"{os.environ.get('NIRA_USERNAME', 'dhsi2.api')}"
+    password = f"{os.environ.get('NIRA_PASSWORD', '7162165ccebfa49657126bd8')}"
+    realm = f"{os.environ.get('NIRA_REALM', 'mVRS API:deaths')}"
     headers = {"Content-Type": "application/json"}
     response = requests.post(url, auth=HTTPDigestAuth(username, password), json=data, headers=headers)
     try:
-        data = response.json()
+        _data = response.json()
+        if debug:
+            print(url)
+            print(_data)
+            print("#### BEGIN SUBMITTED RECORD ####")
+            print(json.dumps(data))
+            print("#### END SUBMITTED RECORD ####")
         return True if response.status_code == 200 else False
     except Exception:
         return False
 
 
-if __name__ == '__main__':
-    nira_dict = __data__map().copy()
-    dhis_data = get_dhis_data()
+def transfer(debug=False):
     count = 0
     failed = 0
-    for row in dhis_data['rows']:
+    start = os.environ.get('START_COUNT', 'X')
+    end = os.environ.get('END_COUNT', 'X')
+    dhis_data_rows = dhis_data['rows']
+    if start != 'X' and end != 'X':
+        try:
+            dhis_data_rows = dhis_data_rows[int(start):int(end)]
+        except Exception:
+            pass
+
+    for row in dhis_data_rows:
         nira_post_data = get_nira_data(row)
-        if submit_to_nira(nira_post_data):
+        if submit_to_nira(nira_post_data, debug=debug):
             count += 1
         else:
             failed += 1
     print(f"Success: {count}, Failed: {failed}")
+
+
+if __name__ == '__main__':
+    nira_dict = __data__map().copy()
+    dhis_data = get_dhis_data()
+    transfer(debug=bool(os.environ.get('DEBUG', 0)))
+
