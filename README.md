@@ -3,8 +3,8 @@
 
 ##### Start the container
 ###### Test Env
-- `docker run -d --name zato-cron plydot/zato-cron:latest -e DEBUG=1`
-- `docker run -d --name zato-cron plydot/zato-cron:latest -e DEBUG=1 -e START_COUNT=1 -e END_COUNT=2`
+- `docker run -d --name zato-cron  -e DEBUG=1 plydot/zato-cron:latest`
+- `docker run -d --name zato-cron  -e DEBUG=1 -e START_COUNT=1 -e END_COUNT=2 plydot/zato-cron:latest`
 
 ###### Prod Env
 `docker run  -d --name zato-cron -e NIRA_URL=http://example.com \
