@@ -24,7 +24,7 @@
 
 #### Inside the container
 `docker exec -it zato-cron bash` \
-`python main.py` \
+`python3 /main.py` \
 `export START_COUNT=10` \
 `export END_COUNT=20`
 
