@@ -324,7 +324,12 @@ def get_dhis_data():
     # send a get request with the auth header
     response = requests.get(url, auth=basic_auth_credentials)
     # print the response text
-    return response.json()
+    try:
+        return response.json()
+    except Exception as e:
+        print(str(e))
+        print(response.text)
+        return None
 
 
 def get_nira_data(row):
