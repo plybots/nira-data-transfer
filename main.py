@@ -348,7 +348,7 @@ def get_nira_data(row):
                     post_data[key]['residence'] = residence
         if key == 'externalCauseOfDeath':
             if len(sub_dict) <= 1:
-                post_data.pop('externalCauseOfDeath')
+                post_data.pop('externalCauseOfDeath', None)
         if key == 'placeOfDeath':
             post_data[key] = get_place_of_death(sub_dict.get('healthFacilityName'))
     return post_data
@@ -400,5 +400,5 @@ def transfer(debug=False):
 if __name__ == '__main__':
     nira_dict = __data__map().copy()
     dhis_data = get_dhis_data()
-    transfer(debug=bool(os.environ.get('DEBUG', 0)))
+    transfer(debug=bool(os.environ.get('DEBUG', 1)))
 
