@@ -376,7 +376,6 @@ def get_nira_data(row):
                 post_data.get("deceased")['age'] = age
             except Exception as e:
                 print(str(e))
-    print(json.dumps(post_data))
     return post_data
 
 
@@ -415,18 +414,20 @@ def transfer(debug=False):
             dhis_data_rows = dhis_data_rows[int(start):int(end)]
         except Exception:
             pass
-
+    error_file_path = "error_logs.txt"
     for row in dhis_data_rows:
         nira_post_data = get_nira_data(row)
         if submit_to_nira(nira_post_data, debug=debug):
             count += 1
         else:
             failed += 1
+            with open(error_file_path, "a") as file:
+                file.write(f'{row[0]}:{datetime.datetime.now()}' + "\n")
     print(f"Success: {count}, Failed: {failed}")
 
 
 if __name__ == '__main__':
     nira_dict = __data__map().copy()
     dhis_data = get_dhis_data()
-    transfer(debug=bool(os.environ.get('DEBUG', 0)))
+    transfer(debug=bool(os.environ.get('DEBUG', 1)))
 
