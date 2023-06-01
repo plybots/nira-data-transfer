@@ -222,6 +222,7 @@ def get_national_category(s, headers, row):
                 return 'N'
     return 'N'
 
+
 def get_declarant_capacity(s, headers, row):
     position = get_row_position(s, headers)
     if position:
@@ -266,7 +267,7 @@ def get_place_of_death(ouid):
     if healthFacilityName:
         placeOfDeath['healthFacilityName'] = healthFacilityName
     if districtName:
-        placeOfDeath['districtName'] = districtName
+        placeOfDeath['districtName'] = districtName.replace("District", "").strip()
     if subcountyName:
         placeOfDeath['subcountyName'] = subcountyName
         placeOfDeath['countyName'] = subcountyName
@@ -332,6 +333,10 @@ def get_dhis_data():
         return None
 
 
+def get_age(s, headers, row):
+    return 0
+
+
 def get_nira_data(row):
     keys = ['deceased', 'causeOfDeath', 'externalCauseOfDeath', 'placeOfDeath']
     # Initialize the nira_post_data with the top level dict
@@ -345,12 +350,33 @@ def get_nira_data(row):
             if key == 'deceased':
                 residence = iterate_dict(nira_dict[key]['residence'], dhis_data['headers'], row)
                 if residence:
+                    if residence.get('districtName'):
+                        residence['districtName'] = residence.get('districtName').replace("District", "").strip()
+
+                    if residence.get('subcountyName'):
+                        residence['subcountyName'] = residence.get('subcountyName').replace("Subcounty", "").strip()
+
                     post_data[key]['residence'] = residence
         if key == 'externalCauseOfDeath':
             if len(sub_dict) <= 1:
                 post_data.pop('externalCauseOfDeath', None)
         if key == 'placeOfDeath':
             post_data[key] = get_place_of_death(sub_dict.get('healthFacilityName'))
+
+    date_of_death = post_data.get('dateOfDeath')
+    date_of_birth = post_data.get("deceased").get('dateOfBirth')
+    if date_of_birth and date_of_death:
+        age = post_data.get("deceased").get('age')
+        print(age)
+        if not age:
+            try:
+                date_of_birth = datetime.datetime.strptime(date_of_birth, "%Y-%m-%d")
+                date_of_death = datetime.datetime.strptime(date_of_death, "%Y-%m-%d")
+                age = int((date_of_death - date_of_birth).days // 365)
+                post_data.get("deceased")['age'] = age
+            except Exception as e:
+                print(str(e))
+    print(json.dumps(post_data))
     return post_data
 
 
@@ -372,7 +398,9 @@ def submit_to_nira(data, debug=False):
             print(json.dumps(data))
             print("#### END SUBMITTED RECORD ####")
         return True if response.status_code == 200 else False
-    except Exception:
+    except Exception as e:
+        if debug:
+            print(str(e))
         return False
 
 
@@ -400,5 +428,5 @@ def transfer(debug=False):
 if __name__ == '__main__':
     nira_dict = __data__map().copy()
     dhis_data = get_dhis_data()
-    transfer(debug=bool(os.environ.get('DEBUG', 1)))
+    transfer(debug=bool(os.environ.get('DEBUG', 0)))
 
