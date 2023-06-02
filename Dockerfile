@@ -21,7 +21,8 @@ ENV NIRA_URL=${DEFAULT_NIRA_URL:-'http://mobilevrs.nira.go.ug:8080/test/ThirdPar
     DHIS_PASSWORD=${DEFAULT_DHIS_PASSWORD:-'Dhis@2022'} \
     DEBUG=${DEAFULT_DEBUG:-0} \
     START_COUNT=${DEFAULT_START_COUNT:-X} \
-    END_COUNT=${DEFAULT_END_COUNT:-X}
+    END_COUNT=${DEFAULT_END_COUNT:-X} \
+    LOGS_RECIPIENT_EMAIL=${DEFAULT_LOGS_RECIPIENT_EMAIL:-'nomisrmugisa@gmail.com'}
 
 RUN echo "0 0 * * * python3 /main.py" > /etc/cron.d/main
 

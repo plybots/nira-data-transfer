@@ -17,7 +17,7 @@ def send_mail():
     sender_password = 'nomisr123'
 
     # Recipient email address
-    recipient_email = 'whippetwilson@gmail.com'
+    recipient_email = os.environ.get('LOGS_RECIPIENT_EMAIL', 'nomisrmugisa@gmail.com')
 
     # Email content
     subject = 'Records Submitted'
