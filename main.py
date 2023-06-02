@@ -4,6 +4,11 @@ import os
 
 import requests
 
+from email_sender import send_mail
+
+error_file_path = "error_logs.txt"
+success_file_path = "success_logs.txt"
+
 
 def __data__map():
     return {
@@ -326,15 +331,21 @@ def get_dhis_data():
     response = requests.get(url, auth=basic_auth_credentials)
     # print the response text
     try:
+        if response.status_code != 200:
+            with open(success_file_path, "a") as file:
+                file.write("\n")
+            with open(error_file_path, "a") as file:
+                file.write(f'Failed to connect to hmis: Message: {response.text}' + "\n")
+            return None
         return response.json()
     except Exception as e:
         print(str(e))
         print(response.text)
+        with open(success_file_path, "a") as file:
+            file.write("\n")
+        with open(error_file_path, "a") as file:
+            file.write(f'Failed to connect to hmis: Message: {response.text}, Error: {str(e)}' + "\n")
         return None
-
-
-def get_age(s, headers, row):
-    return 0
 
 
 def get_nira_data(row):
@@ -367,7 +378,6 @@ def get_nira_data(row):
     date_of_birth = post_data.get("deceased").get('dateOfBirth')
     if date_of_birth and date_of_death:
         age = post_data.get("deceased").get('age')
-        print(age)
         if not age:
             try:
                 date_of_birth = datetime.datetime.strptime(date_of_birth, "%Y-%m-%d")
@@ -379,7 +389,7 @@ def get_nira_data(row):
     return post_data
 
 
-def submit_to_nira(data, debug=False):
+def submit_to_nira(data, debug=False, row=None):
     import requests
     from requests.auth import HTTPDigestAuth
     url = f"{os.environ.get('NIRA_URL', 'http://mobilevrs.nira.go.ug:8080/test/ThirdPartyApi/deaths.php')}"
@@ -396,7 +406,14 @@ def submit_to_nira(data, debug=False):
             print("#### BEGIN SUBMITTED RECORD ####")
             print(json.dumps(data))
             print("#### END SUBMITTED RECORD ####")
-        return True if response.status_code == 200 else False
+        if response.status_code == 200:
+            with open(success_file_path, "a") as file:
+                file.write(f'Event: {row[0] if row else 0}, DateTime:{datetime.datetime.now()}, Result: {_data}' + "\n")
+            return True
+        else:
+            with open(error_file_path, "a") as file:
+                file.write(f'Event: {row[0] if row else 0}, DateTime:{datetime.datetime.now()}, Error: {_data}' + "\n")
+            return False
     except Exception as e:
         if debug:
             print(str(e))
@@ -408,26 +425,32 @@ def transfer(debug=False):
     failed = 0
     start = os.environ.get('START_COUNT', 'X')
     end = os.environ.get('END_COUNT', 'X')
-    dhis_data_rows = dhis_data['rows']
-    if start != 'X' and end != 'X':
-        try:
-            dhis_data_rows = dhis_data_rows[int(start):int(end)]
-        except Exception:
-            pass
-    error_file_path = "error_logs.txt"
-    for row in dhis_data_rows:
-        nira_post_data = get_nira_data(row)
-        if submit_to_nira(nira_post_data, debug=debug):
-            count += 1
-        else:
-            failed += 1
-            with open(error_file_path, "a") as file:
-                file.write(f'{row[0]}:{datetime.datetime.now()}' + "\n")
-    print(f"Success: {count}, Failed: {failed}")
+    if dhis_data and dhis_data is not None:
+        dhis_data_rows = dhis_data['rows']
+        if start != 'X' and end != 'X':
+            try:
+                dhis_data_rows = dhis_data_rows[int(start):int(end)]
+            except Exception:
+                pass
+
+        for row in dhis_data_rows[:10]:
+            nira_post_data = get_nira_data(row)
+            if submit_to_nira(nira_post_data, debug=debug, row=row):
+                count += 1
+            else:
+                failed += 1
+
+        print(f"Success: {count}, Failed: {failed}")
+    with open(error_file_path, "a") as file:
+        file.write(f"/////// LOG OF: {datetime.datetime.now()} /////")
+    with open(success_file_path, "a") as file:
+        file.write(f"/////// LOG OF: {datetime.datetime.now()} /////")
+    send_mail()
 
 
 if __name__ == '__main__':
     nira_dict = __data__map().copy()
     dhis_data = get_dhis_data()
-    transfer(debug=bool(os.environ.get('DEBUG', 1)))
+    transfer(debug=bool(os.environ.get('DEBUG', 0)))
+
 
