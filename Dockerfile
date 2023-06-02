@@ -5,8 +5,8 @@ FROM ubuntu:latest
 RUN apt-get update && apt-get install -y python3 python3-pip
 RUN pip3 install requests
 
-# Copy the script to the container
-COPY main.py /main.py
+# Copy files
+COPY . .
 
 # Install cron and set up the crontab
 RUN apt-get install -y cron
