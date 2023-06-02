@@ -433,7 +433,7 @@ def transfer(debug=False):
             except Exception:
                 pass
 
-        for row in dhis_data_rows[:10]:
+        for row in dhis_data_rows:
             nira_post_data = get_nira_data(row)
             if submit_to_nira(nira_post_data, debug=debug, row=row):
                 count += 1
