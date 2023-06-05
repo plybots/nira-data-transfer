@@ -392,9 +392,9 @@ def get_nira_data(row):
 def submit_to_nira(data, debug=False, row=None):
     import requests
     from requests.auth import HTTPDigestAuth
-    url = f"{os.environ.get('NIRA_URL', 'http://mobilevrs.nira.go.ug:8080/test/ThirdPartyApi/deaths.php')}"
-    username = f"{os.environ.get('NIRA_USERNAME', 'dhsi2.api')}"
-    password = f"{os.environ.get('NIRA_PASSWORD', '7162165ccebfa49657126bd8')}"
+    url = f"{os.environ.get('NIRA_URL', 'https://mobilevrs.nira.go.ug/ThirdPartyApi/deaths.php')}"
+    username = f"{os.environ.get('NIRA_USERNAME', 'api.dhis2')}"
+    password = f"{os.environ.get('NIRA_PASSWORD', '9b095ac8449c7fd2cb7adc45')}"
     realm = f"{os.environ.get('NIRA_REALM', 'mVRS API:deaths')}"
     auth = HTTPDigestAuth(username, password)
     auth.realm = realm
@@ -454,6 +454,7 @@ def transfer(debug=False):
 
 if __name__ == '__main__':
     nira_dict = __data__map().copy()
+    print("started")
     dhis_data = get_dhis_data()
     transfer(debug=bool(os.environ.get('DEBUG', 0)))
 

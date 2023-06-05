@@ -24,7 +24,11 @@ ENV NIRA_URL=${DEFAULT_NIRA_URL:-'http://mobilevrs.nira.go.ug:8080/test/ThirdPar
     END_COUNT=${DEFAULT_END_COUNT:-X} \
     LOGS_RECIPIENT_EMAIL=${DEFAULT_LOGS_RECIPIENT_EMAIL:-'nomisrmugisa@gmail.com'}
 
-RUN echo "0 0 * * * python3 /main.py" > /etc/cron.d/main
+# Add a script to run the job once and then set up the cron job for midnight
+RUN echo "#!/bin/bash" > /run-job.sh \
+    && echo "python3 /main.py" >> /run-job.sh \
+    && echo "echo '0 0 * * * /run-job.sh' | crontab -" >> /run-job.sh \
+    && chmod +x /run-job.sh
 
 # Start cron in the foreground
 CMD ["cron", "-f"]
