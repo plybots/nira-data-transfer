@@ -6,8 +6,16 @@
 - `docker run -d --name zato-cron  -e DEBUG=1 plydot/zato-cron:latest`
 - `docker run -d --name zato-cron  -e DEBUG=1 -e START_COUNT=1 -e END_COUNT=2 plydot/zato-cron:latest`
 
-###### Prod Env
-`docker run  -d --name zato-cron -e NIRA_URL=http://example.com \
+##### Prod SetUp
+###### Quick Start
+
+```sh 
+git clone https://github.com/whippetwilson/nira-data-transfer.git && cd nira-data-transfer && chmod +x run-zato-cron.sh && ./run-zato-cron.sh
+```
+##### Customized SetUp
+
+```sh
+docker run  -d --name zato-cron -e NIRA_URL=http://example.com \
            -e NIRA_USERNAME=myusername \
            -e NIRA_PASSWORD=mypassword \
            -e NIRA_REALM=myrealm \
@@ -17,12 +25,14 @@
            -e DHIS_PASSWORD=mydhispwd \
            -e DEBUG=0 \
            plydot/zato-cron:latest
-`
+```
 
 #### Build Container your self
-`docker build -t zato-cron:latest .`
+```sh
+docker build -t zato-cron:latest .
+```
 
-#### Inside the container
+#### Run Inside the container
 `docker exec -it zato-cron bash` \
 `python3 /main.py` \
 `export START_COUNT=10` \
