@@ -263,7 +263,7 @@ def get_place_of_death(ouid):
     url = f"{os.environ.get('DHIS_BASE_URL', 'https://hmis.health.go.ug')}/api/organisationUnits/{ouid}?fields=name,level,parent[name,level,parent[name,level,parent[name,level,parent[name,level]]"
     basic_auth_credentials = (f"{os.environ.get('DHIS_USERNAME', 'moh-rch.dmurokora')}", f"{os.environ.get('DHIS_PASSWORD', 'Dhis@2022')}")
     # send a get request with the auth header
-    response = requests.get(url, auth=basic_auth_credentials)
+    response = requests.get(url, auth=basic_auth_credentials, verify=False)
     data = response.json()
     healthFacilityName = get_dict_value_at_level(data, 5)
     districtName = get_dict_value_at_level(data, 3)
@@ -328,7 +328,7 @@ def get_dhis_data():
           "aKclf7Yl1PE.bNpMzyShDCX&stage=aKclf7Yl1PE&displayProperty=NAME&outputType=EVENT&desc=eventdate&paging=false"
     basic_auth_credentials = (f"{os.environ.get('DHIS_USERNAME', 'moh-rch.dmurokora')}", f"{os.environ.get('DHIS_PASSWORD', 'Dhis@2022')}")
     # send a get request with the auth header
-    response = requests.get(url, auth=basic_auth_credentials)
+    response = requests.get(url, auth=basic_auth_credentials, verify=False)
     # print the response text
     try:
         if response.status_code != 200:
