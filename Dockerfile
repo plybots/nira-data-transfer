@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y python3 python3-pip
 RUN pip3 install requests
 # Install Supervisor
 RUN apt-get install -y supervisor
+RUN apt-get install -y vim
 
 # Copy files
 COPY . .
@@ -13,8 +14,7 @@ COPY . .
 # Copy the Supervisor configuration file
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Install cron and set up the crontab
-RUN apt-get install -y cron
+RUN chmod +x /loop.sh
 
 ENV NIRA_URL=${DEFAULT_NIRA_URL:-'http://mobilevrs.nira.go.ug:8080/test/ThirdPartyApi/deaths.php'} \
     NIRA_USERNAME=${DEFAULT_NIRA_USERNAME:-'dhsi2.api'} \
