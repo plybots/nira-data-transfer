@@ -1,5 +1,6 @@
 #!/bin/bash
 
+chmod u+x loop.sh
 # Stop and remove the zato-cron container if it exists
 docker container stop zato-cron
 docker container rm zato-cron
