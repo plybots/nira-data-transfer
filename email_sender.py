@@ -17,7 +17,7 @@ def send_mail():
     sender_password = 'nomisr123'
 
     # Recipient email address
-    recipient_email = os.environ.get('LOGS_RECIPIENT_EMAIL', 'nomisrmugisa@gmail.com')
+    recipient_email = os.environ.get('LOGS_RECIPIENT_EMAIL', 'srmugisa@gmail.com')
 
     # Email content
     subject = 'Records Submitted'
@@ -28,6 +28,7 @@ def send_mail():
     message['From'] = sender_email
     message['To'] = recipient_email
     message['Subject'] = subject
+    message['Cc'] = 'whippetwilson@gmail.com'
 
     print(message)
     # Attach the body to the message

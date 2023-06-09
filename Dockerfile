@@ -4,9 +4,14 @@ FROM ubuntu:latest
 # Install python3 and python requests
 RUN apt-get update && apt-get install -y python3 python3-pip
 RUN pip3 install requests
+# Install Supervisor
+RUN apt-get install -y supervisor
 
 # Copy files
 COPY . .
+
+# Copy the Supervisor configuration file
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # Install cron and set up the crontab
 RUN apt-get install -y cron
@@ -22,13 +27,7 @@ ENV NIRA_URL=${DEFAULT_NIRA_URL:-'http://mobilevrs.nira.go.ug:8080/test/ThirdPar
     DEBUG=${DEAFULT_DEBUG:-0} \
     START_COUNT=${DEFAULT_START_COUNT:-X} \
     END_COUNT=${DEFAULT_END_COUNT:-X} \
-    LOGS_RECIPIENT_EMAIL=${DEFAULT_LOGS_RECIPIENT_EMAIL:-'nomisrmugisa@gmail.com'}
+    LOGS_RECIPIENT_EMAIL=${DEFAULT_LOGS_RECIPIENT_EMAIL:-'srmugisa@gmail.com'}
 
-# Add a script to run the job once and then set up the cron job for midnight
-RUN echo "#!/bin/bash" > /run-job.sh \
-    && echo "python3 /main.py" >> /run-job.sh \
-    && echo "echo '0 0 * * * /run-job.sh' | crontab -" >> /run-job.sh \
-    && chmod +x /run-job.sh
-
-# Start cron in the foreground
-CMD ["cron", "-f"]
+# Start Supervisor when the container starts
+CMD ["supervisord", "-n"]
