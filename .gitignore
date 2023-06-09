@@ -1,4 +1,4 @@
-/error_logs.txt
-/success_logs.txt
+/error_logs*
+/success_logs*
 /.idea/dataSources.xml
 /logs.db

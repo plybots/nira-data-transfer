@@ -61,7 +61,7 @@ def send_mail():
             server.send_message(message)
             print("Email sent successfully!")
             # Delete the attached files
-            os.rename('success_logs.txt', f"success_logs_{datetime.datetime.now()}.txt")
-            os.rename('error_logs.txt', f"error_logs_{datetime.datetime.now()}.txt")
+            os.rename('success_logs.txt', f"success_logs_{datetime.datetime.now().strftime('%Y_%m_%dT%H.%M.%S')}.txt")
+            os.rename('error_logs.txt', f"error_logs_{datetime.datetime.now().strftime('%Y_%m_%dT%H.%M.%S')}.txt")
     except Exception as e:
         print("Error occurred while sending the email:", str(e))
