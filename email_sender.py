@@ -1,3 +1,4 @@
+import datetime
 import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -60,8 +61,7 @@ def send_mail():
             server.send_message(message)
             print("Email sent successfully!")
             # Delete the attached files
-            os.remove('success_logs.txt')
-            os.remove('error_logs.txt')
-            print("Files deleted successfully!")
+            os.rename('success_logs.txt', f"success_logs_{datetime.datetime.now()}.txt")
+            os.rename('error_logs.txt', f"error_logs_{datetime.datetime.now()}.txt")
     except Exception as e:
         print("Error occurred while sending the email:", str(e))
