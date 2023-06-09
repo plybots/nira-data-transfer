@@ -6,6 +6,10 @@ import requests
 
 from email_sender import send_mail
 
+from sqlite import SQLiteManager
+
+manager = SQLiteManager()
+
 error_file_path = "error_logs.txt"
 success_file_path = "success_logs.txt"
 
@@ -411,6 +415,8 @@ def submit_to_nira(data, debug=False, row=None):
         if response.status_code == 200:
             with open(success_file_path, "a") as file:
                 file.write(f'Event: {row[0] if row else 0}, DateTime:{datetime.datetime.now()}, Result: {_data}' + "\n")
+            # Store an id
+            manager.store(row[0] if row else 0)
             return True
         else:
             with open(error_file_path, "a") as file:
@@ -438,11 +444,14 @@ def transfer(debug=False):
                 pass
 
         for row in dhis_data_rows:
-            nira_post_data = get_nira_data(row)
-            if submit_to_nira(nira_post_data, debug=debug, row=row):
-                count += 1
-            else:
-                failed += 1
+            # Check if an id exists
+            exists = manager.id_exists(row[0] if row else 0)
+            if not exists:
+                nira_post_data = get_nira_data(row)
+                if submit_to_nira(nira_post_data, debug=debug, row=row):
+                    count += 1
+                else:
+                    failed += 1
 
         print(f"Success: {count}, Failed: {failed}")
     with open(error_file_path, "a") as file:
