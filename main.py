@@ -456,8 +456,10 @@ def transfer(debug=False):
         print(f"Success: {count}, Failed: {failed}")
     with open(error_file_path, "a") as file:
         file.write(f"/////// LOG OF: {datetime.datetime.now()} /////")
+        file.write(f"/////// TOTAL ENTRIES: {count} /////")
     with open(success_file_path, "a") as file:
         file.write(f"/////// LOG OF: {datetime.datetime.now()} /////")
+        file.write(f"/////// TOTAL ENTRIES: {failed} /////")
     send_mail()
 
 
