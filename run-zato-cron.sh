@@ -9,4 +9,4 @@ docker container rm zato-cron
 docker image rm plydot/zato-cron:latest
 
 # Run the zato-cron container with the specified environment variables
-docker run -d --name zato-cron -e NIRA_URL=https://mobilevrs.nira.go.ug/ThirdPartyApi/deaths.php -e NIRA_USERNAME=api.dhis2 -e NIRA_PASSWORD=9b095ac8449c7fd2cb7adc45 plydot/zato-cron:latest
+docker run -d --name zato-cron -e NIRA_URL=https://mobilevrs.nira.go.ug/ThirdPartyApi/deaths.php -e NIRA_USERNAME=api.dhis2 -e NIRA_PASSWORD=9b095ac8449c7fd2cb7adc45 -e DHIS_PASSWORD=Dhis@2023 plydot/zato-cron:latest
